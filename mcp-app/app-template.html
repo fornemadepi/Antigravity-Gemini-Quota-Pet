@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <title>Gemini 桌宠</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; }
+    body {
+      background: var(--color-background-primary, #121526);
+      color: var(--color-text-primary, #eef2ff);
+      font-family: var(--font-sans, "Microsoft YaHei UI", system-ui, sans-serif);
+      padding: 14px;
+      font-size: 13px;
+    }
+    .stage-box {
+      position: relative;
+      height: 270px;
+      border-radius: 16px;
+      background: radial-gradient(circle at 65% 25%, rgba(124, 77, 255, 0.16), rgba(37, 99, 235, 0.05) 70%);
+      border: 1px solid var(--color-border-primary, rgba(148, 163, 232, 0.22));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      margin-bottom: 12px;
+    }
+    .stage-inner {
+      position: relative;
+      width: 310px;
+      height: 255px;
+    }
+    .pet-hit {
+      position: absolute;
+      left: 6px;
+      bottom: 2px;
+      width: 158px;
+      height: 210px;
+      cursor: pointer;
+      z-index: 10;
+      display: flex;
+      align-items: flex-end;
+      justify-content: center;
+    }
+    .sprite-mover {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: flex-end;
+      justify-content: center;
+      transform-origin: bottom center;
+      animation: idleFloat 3.6s ease-in-out infinite;
+    }
+    .sprite-mover.squish {
+      animation: jellySquish 0.52s cubic-bezier(0.25, 1, 0.5, 1);
+    }
+    .pet-img {
+      max-width: 100%;
+      max-height: 100%;
+      object-fit: contain;
+      transform: scaleX(-1);
+      filter: drop-shadow(0 6px 14px rgba(18, 16, 48, 0.35));
+    }
+    .bubble-wrap {
+      position: absolute;
+      right: 2px;
+      top: 6px;
+      width: 212px;
+      z-index: 20;
+      cursor: pointer;
+    }
+    .bubble {
+      width: 210px;
+      min-height: 122px;
+      padding: 13px 14px;
+      background: radial-gradient(circle at 30% 22%, #ffffff 0%, #f5f8ff 100%);
+      border: 3.5px solid #29386c;
+      border-radius: 50% / 47%;
+      box-shadow: 0 8px 20px rgba(17, 23, 54, 0.28), inset 0 -3px 0 rgba(78, 103, 198, 0.12);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      transition: transform 0.15s;
+    }
+    .bubble:hover { transform: translateY(-2px); }
+    .bubble:active { transform: scale(0.96); }
+    .b-card { display: none; width: 100%; flex-direction: column; align-items: center; gap: 3px; }
+    .b-card.active { display: flex; }
+    .b-title { font-size: 12.5px; font-weight: 800; color: #364b88; display: flex; align-items: center; gap: 4px; }
+    .b-reset { font-size: 10px; padding: 1px 5px; border-radius: 999px; background: rgba(78,104,199,0.12); color: #5566a0; }
+    .hero-num { font-size: 29px; font-weight: 900; line-height: 1.12; font-variant-numeric: tabular-nums; }
+    .hero-num.good {
+      background: linear-gradient(135deg, #2d5be3 0%, #7c4dff 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .hero-num.warn { color: #d97706; }
+    .hero-num.low { color: #e03e36; }
+    .b-pill {
+      padding: 2px 10px;
+      border-radius: 999px;
+      background: linear-gradient(135deg, #4b66c8 0%, #6859ea 100%);
+      color: #fff;
+      font-size: 10.5px;
+      font-weight: 700;
+      max-width: 182px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .bar-line { width: 168px; display: flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 800; color: #29386c; margin: 2px 0; }
+    .bar-bg { flex: 1; height: 8px; background: #e4e9f7; border-radius: 999px; overflow: hidden; }
+    .bar-fg5 { height: 100%; background: linear-gradient(90deg, #3b82f6, #8b5cf6); border-radius: 999px; }
+    .bar-fgw { height: 100%; background: linear-gradient(90deg, #10b981, #3b82f6); border-radius: 999px; }
+    .trail { position: relative; height: 24px; pointer-events: none; }
+    .dot { position: absolute; background: #fff; border: 3px solid #29386c; border-radius: 50%; }
+    .dot1 { width: 17px; height: 12px; left: 42px; top: 3px; }
+    .dot2 { width: 11px; height: 8px; left: 26px; top: 16px; }
+    .star-p { position: absolute; font-size: 15px; font-weight: 900; pointer-events: none; animation: floatStar 0.88s forwards; }
+    .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 10px; }
+    .card {
+      padding: 9px 11px;
+      border-radius: 10px;
+      background: var(--color-background-secondary, rgba(255,255,255,0.05));
+      border: 1px solid var(--color-border-primary, rgba(148,163,232,0.2));
+    }
+    .card-lbl { font-size: 11.5px; color: var(--color-text-secondary, #9aa5ce); }
+    .card-val { font-size: 19px; font-weight: 800; margin: 1px 0; font-variant-numeric: tabular-nums; }
+    .btn-row { display: flex; flex-wrap: wrap; gap: 7px; margin-bottom: 10px; }
+    button, select, input {
+      font-family: inherit;
+      font-size: 12px;
+      border-radius: 8px;
+    }
+    button {
+      padding: 7px 11px;
+      font-weight: 700;
+      cursor: pointer;
+      border: 1px solid var(--color-border-primary, rgba(148,163,232,0.28));
+      background: var(--color-background-secondary, rgba(255,255,255,0.08));
+      color: var(--color-text-primary, #eef2ff);
+    }
+    button.primary {
+      background: linear-gradient(135deg, #5b6cf9, #8b5cf6);
+      color: #fff;
+      border: none;
+      flex: 1;
+    }
+    select, input[type="number"] {
+      padding: 4px 7px;
+      background: var(--color-background-secondary, #161a33);
+      color: var(--color-text-primary, #fff);
+      border: 1px solid var(--color-border-primary, rgba(148,163,232,0.3));
+    }
+    .hidden { display: none !important; }
+    .form-line { display: flex; align-items: center; justify-content: space-between; gap: 6px; margin: 6px 0; font-size: 12px; }
+    .toast {
+      position: fixed; bottom: 12px; right: 12px; padding: 6px 12px; border-radius: 999px;
+      background: #4f46e5; color: #fff; font-size: 12px; font-weight: 700; opacity: 0; transition: opacity 0.2s; pointer-events: none;
+    }
+    .toast.show { opacity: 1; }
+    @keyframes idleFloat { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-4px); } }
+    @keyframes jellySquish {
+      0% { transform: scale(1,1); } 22% { transform: scale(1.16,0.84) translateY(4px); }
+      48% { transform: scale(0.91,1.09) translateY(-6px); } 72% { transform: scale(1.05,0.96); } 100% { transform: scale(1,1); }
+    }
+    @keyframes floatStar {
+      0% { opacity: 1; transform: translate(0,0) scale(0.6); }
+      100% { opacity: 0; transform: translate(var(--tx), var(--ty)) scale(1.25) rotate(var(--rot)); }
+    }
+  </style>
+</head>
+<body>
+  <div class="stage-box">
+    <div class="stage-inner">
+      <div id="pet-hit" class="pet-hit" title="左键戳猫娘互动并刷新额度">
+        <div id="particles" style="position:absolute;inset:0;pointer-events:none;z-index:30"></div>
+        <div id="sprite-mover" class="sprite-mover">
+          <img id="pet-img" class="pet-img" alt="Gemini" />
+        </div>
+      </div>
+
+      <div class="bubble-wrap" title="左键点击切换 4 种气泡卡片">
+        <div id="bubble" class="bubble">
+          <div id="card-0" class="b-card active">
+            <div class="b-title"><span id="c0-label">5小时剩余额度：</span><span id="c0-reset" class="b-reset">↻ --</span></div>
+            <div id="c0-hero" class="hero-num good">--%</div>
+            <div id="c0-pill" class="b-pill">周剩余 --% · ↻ --</div>
+          </div>
+
+          <div id="card-1" class="b-card">
+            <div class="b-title">上一轮对话消耗：</div>
+            <div id="c1-hero" class="hero-num low">-0.00%</div>
+            <div id="c1-pill" class="b-pill">等待新对话记录</div>
+          </div>
+
+          <div id="card-2" class="b-card">
+            <div class="bar-line"><span style="width:22px;text-align:right">5H</span><div class="bar-bg"><div id="b-5h" class="bar-fg5" style="width:100%"></div></div><span id="b-5h-val" style="width:34px">--%</span></div>
+            <div class="bar-line"><span style="width:22px;text-align:right">周</span><div class="bar-bg"><div id="b-wk" class="bar-fgw" style="width:100%"></div></div><span id="b-wk-val" style="width:34px">--%</span></div>
+            <div id="b-sub" style="font-size:10.5px;font-weight:700;color:#5b6b9e;margin-top:2px">今日 0 tok</div>
+          </div>
+
+          <div id="card-3" class="b-card">
+            <div style="font-size:11px;font-weight:800;color:#6d4aff">✦ Gemini 双子星语</div>
+            <div id="quote-txt" style="font-size:12px;font-weight:700;color:#2b396b;line-height:1.4;max-width:174px">异色瞳帮你盯紧额度啦✨</div>
+          </div>
+        </div>
+        <div class="trail"><span class="dot dot1"></span><span class="dot dot2"></span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="btn-row">
+    <button id="btn-launch-desktop" class="primary">🪟 弹出独立 Windows 桌面悬浮桌宠</button>
+    <button id="btn-toggle-cal">🎯 校准额度</button>
+    <button id="btn-open-folder" title="打开独立桌宠文件夹">📂</button>
+  </div>
+
+  <div id="cal-panel" class="card hidden" style="margin-bottom:10px">
+    <div style="font-weight:800;margin-bottom:4px">🎯 对照 Settings → Models 校准官方百分比</div>
+    <div class="form-line">
+      <span>5h剩余% / 重置:</span>
+      <div>
+        <input id="cal-5h-pct" type="number" min="0" max="100" step="0.5" value="80" style="width:56px" />%
+        <input id="cal-5h-h" type="number" min="0" max="5" value="3" style="width:42px" />h
+        <input id="cal-5h-m" type="number" min="0" max="59" value="0" style="width:42px" />m
+      </div>
+    </div>
+    <div class="form-line">
+      <span>周剩余% / 重置:</span>
+      <div>
+        <input id="cal-wk-pct" type="number" min="0" max="100" step="0.5" value="90" style="width:56px" />%
+        <input id="cal-wk-d" type="number" min="0" max="7" value="5" style="width:42px" />d
+        <input id="cal-wk-h" type="number" min="0" max="23" value="0" style="width:42px" />h
+      </div>
+    </div>
+    <div class="btn-row" style="margin:6px 0 0">
+      <button id="btn-save-cal" class="primary">保存校准</button>
+      <button id="btn-clear-cal">恢复自动滚动</button>
+    </div>
+  </div>
+
+  <div class="grid2">
+    <div class="card">
+      <div class="card-lbl">⚡ 5小时剩余额度</div>
+      <div id="stat-5h" class="card-val">--%</div>
+      <div id="stat-5h-sub" class="card-lbl">重置: --</div>
+    </div>
+    <div class="card">
+      <div class="card-lbl">📅 本周剩余额度</div>
+      <div id="stat-wk" class="card-val">--%</div>
+      <div id="stat-wk-sub" class="card-lbl">重置: --</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="form-line" style="margin:0">
+      <span>主展示指标:</span>
+      <select id="sel-primary">
+        <option value="fiveHour">⚡ 5小时剩余额度</option>
+        <option value="weekly">📅 本周剩余额度</option>
+      </select>
+      <span>表情:</span>
+      <select id="sel-expr">
+        <option value="auto">自动</option>
+        <option value="idle">待机</option>
+        <option value="happy">开心</option>
+        <option value="low">告急</option>
+        <option value="sleep">打盹</option>
+      </select>
+    </div>
+  </div>
+
+  <div id="toast" class="toast">已生效</div>
+  <script>window.__GEMINI_SPRITES__ = __SPRITES_JSON__;</script>
+  <script>__CLIENT_BUNDLE__</script>
+</body>
+</html>
