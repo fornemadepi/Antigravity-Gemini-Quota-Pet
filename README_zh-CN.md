@@ -6,7 +6,7 @@
 
 # ✦ Antigravity Gemini 额度桌宠 (Gemini Quota Pet)
 
-**灵感源自「DeepSeek 小鲸鱼余额挂件」· 专为 Google Antigravity 打造的双子星异色瞳猫娘陪伴桌宠**  
+**专为 Google Antigravity 打造的双子星异色瞳猫娘陪伴桌宠**  
 实时监控 **剩余 5小时滚动额度**、**本周总额度** 与 **每轮对话消耗** · 支持 **Windows 独立透明悬浮窗 + Antigravity 侧边栏插件** 双形态运行
 
 🌐 **[English (Default)](README.md)** | **简体中文**
@@ -35,11 +35,9 @@ Antigravity 执行完成后，点击界面右上角辅助栏的 **`+` 号菜单 
 
 ## 🌟 项目简介
 
-在使用 DeepSeek 时，由 [@MeteorNOX](https://github.com/MeteorNOX) 创作的 **[DeepSeek-Balance-Whale-Widget（小鲸鱼余额挂件）](https://github.com/MeteorNOX/DeepSeek-Balance-Whale-Widget)** 以呆萌的漫画思想泡泡、每轮消耗提醒和 Q 弹交互深受开发者喜爱。
+在 **Google Antigravity** 开发环境中，模型使用采用 **「5小时活跃滚动额度（5-Hour Rolling Quota）+ 7天周基准额度（Weekly Quota）」** 双池共享机制。在沉浸式写代码时，频繁点开 `Settings → Models` 查看额度既打断心流，也很难直观感知单轮复杂任务消耗了多少配额。
 
-而在 **Google Antigravity** 开发环境中，计费与限流并非按现金余额扣减，而是采用 **「5小时活跃滚动额度（5-Hour Rolling Quota）+ 7天周基准额度（Weekly Quota）」** 双池共享机制。在沉浸式 Coding 时，频繁点开 `Settings → Models` 查看额度既打断心流，也很难直观感知单轮复杂任务消耗了多少配额。
-
-为此，本项目以 **Gemini 双子星拟人化异色瞳猫娘** 为主角，把大肥鱼挂件的经典陪伴体验带到了 Antigravity：
+为此，本项目以 **Gemini 双子星拟人化异色瞳猫娘** 为主角，为你提供漫画思想泡泡、每轮消耗自动提醒、Q 弹摸头反馈以及 **剩余 5小时 / 周额度** 实时监控陪伴体验：
 
 <table>
 <tr>

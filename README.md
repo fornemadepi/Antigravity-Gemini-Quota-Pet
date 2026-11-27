@@ -6,7 +6,7 @@
 
 # ✦ Antigravity Gemini Quota Pet
 
-**Inspired by `DeepSeek-Balance-Whale-Widget` · A Cute Heterochromia Gemini Catgirl Companion for Google Antigravity**  
+**A Cute Heterochromia Gemini Catgirl Companion for Google Antigravity**  
 Real-time **5-Hour Rolling Quota**, **Weekly Quota** & **Per-Turn Consumption** Monitor · Runs as both a **Transparent Desktop Floating Pet** and a **Native Antigravity Sidebar Plugin**
 
 🌐 **English (Default)** | **[简体中文文档 (Chinese README)](README_zh-CN.md)**
@@ -42,11 +42,9 @@ Once installed, click the **`+` menu in the top-right Auxiliary Pane → `Gemini
 
 ## 🌟 Overview
 
-In the DeepSeek community, **[@MeteorNOX](https://github.com/MeteorNOX)**'s open-source **[DeepSeek-Balance-Whale-Widget](https://github.com/MeteorNOX/DeepSeek-Balance-Whale-Widget)** became a beloved coding companion thanks to its comic thought bubbles, per-turn cost popups, and squishy interactive physics.
+In **Google Antigravity**, model usage is governed by **5-Hour Rolling Sprint Quotas** and **7-Day Weekly Quotas**. Opening `Settings → Models` repeatedly breaks coding flow and makes it hard to tell at a glance how much quota a complex multi-step agent turn just consumed.
 
-In **Google Antigravity**, model usage is governed by **5-Hour Rolling Sprint Quotas** and **7-Day Weekly Quotas** rather than cash balances. Opening `Settings → Models` repeatedly breaks coding flow and makes it hard to tell how much quota a complex multi-step turn just consumed.
-
-**Antigravity Gemini Quota Pet** brings that joyful desktop companion experience to Google Antigravity with a custom **Gemini-personified heterochromia catgirl**, swapping cash balance tracking for real-time **Remaining 5-Hour / Weekly Quota** monitoring:
+**Antigravity Gemini Quota Pet** brings an interactive **Gemini-personified heterochromia catgirl** companion right to your desktop and sidebar — featuring comic thought bubbles, automatic per-turn consumption popups, squishy physics, and real-time **Remaining 5-Hour / Weekly Quota** tracking:
 
 <table>
 <tr>
