@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' data:; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-inline';" />
+  <title>Gemini 桌宠 · 额度校准与设置</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: linear-gradient(160deg, #101326 0%, #191d3a 55%, #201a3e 100%);
+      color: #eef2ff;
+      font-family: "Microsoft YaHei UI", "PingFang SC", system-ui, sans-serif;
+      padding: 18px 20px 22px;
+      font-size: 13px;
+      line-height: 1.5;
+      overflow-y: auto;
+    }
+    .header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 14px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid rgba(139, 148, 214, 0.18);
+    }
+    .header img {
+      width: 48px;
+      height: 48px;
+      border-radius: 12px;
+      background: rgba(124, 77, 255, 0.16);
+      border: 1px solid rgba(167, 139, 250, 0.35);
+      object-fit: cover;
+    }
+    .header h1 {
+      font-size: 16px;
+      font-weight: 800;
+      background: linear-gradient(90deg, #c4b5fd, #93c5fd);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .header p {
+      font-size: 11.5px;
+      color: #9aa5ce;
+    }
+    .stats-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-bottom: 14px;
+    }
+    .stat-card {
+      background: rgba(255, 255, 255, 0.055);
+      border: 1px solid rgba(148, 163, 232, 0.18);
+      border-radius: 12px;
+      padding: 10px 12px;
+    }
+    .stat-label {
+      font-size: 11.5px;
+      color: #a5b4fc;
+      display: flex;
+      justify-content: space-between;
+    }
+    .stat-val {
+      font-size: 23px;
+      font-weight: 900;
+      margin: 2px 0;
+      color: #ffffff;
+    }
+    .stat-sub {
+      font-size: 11px;
+      color: #8b96bf;
+    }
+    .panel {
+      background: rgba(255, 255, 255, 0.045);
+      border: 1px solid rgba(148, 163, 232, 0.15);
+      border-radius: 12px;
+      padding: 13px 14px;
+      margin-bottom: 12px;
+    }
+    .panel-title {
+      font-size: 13.5px;
+      font-weight: 800;
+      color: #c4b5fd;
+      margin-bottom: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .hint {
+      font-size: 11.5px;
+      color: #94a0c9;
+      margin-bottom: 10px;
+    }
+    .form-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      margin: 8px 0;
+    }
+    .form-row label {
+      color: #dbe2ff;
+      font-size: 12.5px;
+      flex-shrink: 0;
+    }
+    .inline-inputs {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    input[type="number"],
+    select {
+      background: #12162c;
+      color: #f8fafc;
+      border: 1px solid rgba(148, 163, 232, 0.32);
+      border-radius: 7px;
+      padding: 5px 8px;
+      font-size: 12.5px;
+      width: 68px;
+      outline: none;
+    }
+    select {
+      width: 175px;
+    }
+    input[type="range"] {
+      accent-color: #7c4dff;
+      width: 125px;
+    }
+    input[type="checkbox"] {
+      accent-color: #7c4dff;
+      width: 16px;
+      height: 16px;
+      cursor: pointer;
+    }
+    .btn-row {
+      display: flex;
+      gap: 8px;
+      margin-top: 10px;
+    }
+    button {
+      border: none;
+      border-radius: 8px;
+      padding: 7px 14px;
+      font-size: 12.5px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: transform 0.12s, filter 0.15s;
+    }
+    button:hover { filter: brightness(1.1); }
+    button:active { transform: scale(0.97); }
+    .btn-primary {
+      background: linear-gradient(135deg, #5b6cf9, #8b5cf6);
+      color: #ffffff;
+      flex: 1;
+    }
+    .btn-secondary {
+      background: rgba(148, 163, 232, 0.16);
+      color: #cbd5ff;
+    }
+    .code-box {
+      background: #0c0f20;
+      border: 1px solid rgba(139, 148, 214, 0.25);
+      border-radius: 8px;
+      padding: 7px 9px;
+      font-family: Consolas, monospace;
+      font-size: 11px;
+      color: #a5f3fc;
+      word-break: break-all;
+      margin-top: 6px;
+    }
+    .toast {
+      position: fixed;
+      bottom: 14px;
+      right: 16px;
+      background: #4f46e5;
+      color: #fff;
+      padding: 6px 14px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 700;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.2s;
+      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.35);
+    }
+    .toast.show { opacity: 1; }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <img src="../../assets/icon.png" alt="Gemini" />
+    <div>
+      <h1>✦ Gemini 桌宠 · 额度校准与设置</h1>
+      <p>实时监听本机 Antigravity 会话日志 · 监控 5小时滚动额度与周额度</p>
+    </div>
+  </div>
+
+  <div class="stats-grid">
+    <div class="stat-card">
+      <div class="stat-label">
+        <span>⚡ 5小时剩余额度</span>
+        <span id="mode-5h">滚动统计</span>
+      </div>
+      <div id="live-5h" class="stat-val">--%</div>
+      <div id="live-5h-sub" class="stat-sub">重置倒计时：--</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">
+        <span>📅 本周剩余额度</span>
+        <span id="mode-week">滚动统计</span>
+      </div>
+      <div id="live-week" class="stat-val">--%</div>
+      <div id="live-week-sub" class="stat-sub">重置倒计时：--</div>
+    </div>
+  </div>
+
+  <div class="panel">
+    <div class="panel-title">
+      <span>🎯 一键校准官方额度锚点</span>
+    </div>
+    <div class="hint">
+      可在 Antigravity「设置 → Models」查看当前官方额度条填入下方。校准后桌宠会按每轮对话自动实时扣减，倒计时结束自动回满 100%！
+    </div>
+
+    <div class="form-row">
+      <label>当前 5小时剩余 (%) 与重置倒计时</label>
+      <div class="inline-inputs">
+        <input id="cal-5h-pct" type="number" min="0" max="100" step="0.5" value="85" />
+        <span>%</span>
+        <input id="cal-5h-h" type="number" min="0" max="5" value="3" style="width:48px" />
+        <span>小时</span>
+        <input id="cal-5h-m" type="number" min="0" max="59" value="30" style="width:48px" />
+        <span>分</span>
+      </div>
+    </div>
+
+    <div class="form-row">
+      <label>当前 本周剩余 (%) 与重置倒计时</label>
+      <div class="inline-inputs">
+        <input id="cal-w-pct" type="number" min="0" max="100" step="0.5" value="92" />
+        <span>%</span>
+        <input id="cal-w-d" type="number" min="0" max="7" value="5" style="width:48px" />
+        <span>天</span>
+        <input id="cal-w-h" type="number" min="0" max="23" value="0" style="width:48px" />
+        <span>小时</span>
+      </div>
+    </div>
+
+    <div class="btn-row">
+      <button id="btn-calibrate" class="btn-primary">✨ 保存并立即校准额度</button>
+      <button id="btn-reset-cal" class="btn-secondary">恢复纯本地滚动推算</button>
+    </div>
+  </div>
+
+  <div class="panel">
+    <div class="panel-title">⚙️ 外观、交互与订阅档位</div>
+
+    <div class="form-row">
+      <label>Antigravity 订阅档位（用于扣减权重）</label>
+      <select id="sel-plan">
+        <option value="pro">Google AI Pro (默认)</option>
+        <option value="ultra">Google AI Ultra</option>
+        <option value="plus">Free / Google AI Plus</option>
+      </select>
+    </div>
+
+    <div class="form-row">
+      <label>气泡首选大字指标</label>
+      <select id="sel-primary">
+        <option value="fiveHour">⚡ 5小时剩余额度 (底部显示周额度)</option>
+        <option value="weekly">📅 本周剩余额度 (底部显示5h额度)</option>
+      </select>
+    </div>
+
+    <div class="form-row">
+      <label>桌宠缩放大小 (<span id="lbl-scale">100%</span>)</label>
+      <input id="rng-scale" type="range" min="0.65" max="1.75" step="0.05" value="1.0" />
+    </div>
+
+    <div class="form-row">
+      <label>互动音效音量 (<span id="lbl-vol">65%</span>)</label>
+      <div class="inline-inputs">
+        <input id="chk-sound" type="checkbox" checked title="开启音效" />
+        <input id="rng-vol" type="range" min="0.1" max="1.0" step="0.05" value="0.65" />
+      </div>
+    </div>
+
+    <div class="form-row">
+      <label>每轮对话完成后自动弹出「上一轮消耗」气泡</label>
+      <input id="chk-turn" type="checkbox" checked />
+    </div>
+
+    <div class="form-row">
+      <label>跟随 Antigravity 桌面端窗口右下角</label>
+      <input id="chk-follow" type="checkbox" />
+    </div>
+  </div>
+
+  <div class="panel">
+    <div class="panel-title">
+      <span>🔌 进阶：Antigravity CLI 自动免手填同步</span>
+      <button id="btn-copy-cli" class="btn-secondary" style="padding:3px 10px;font-size:11px">复制命令</button>
+    </div>
+    <div class="hint" style="margin-bottom:4px">
+      若你同时使用 <code>agy</code> CLI，运行一次下方指令即可将官方真实 <code>quota</code> 自动同步给桌宠：
+    </div>
+    <div id="cli-cmd" class="code-box">/statusline node "..."</div>
+  </div>
+
+  <div id="toast" class="toast">已保存生效 ✦</div>
+
+  <script>
+    const toast = document.getElementById('toast');
+    function showToast(msg) {
+      toast.textContent = msg;
+      toast.classList.add('show');
+      setTimeout(() => toast.classList.remove('show'), 1800);
+    }
+
+    function fmtDur(ms) {
+      if (!ms || ms <= 0) return '即将重置';
+      const m = Math.ceil(ms / 60000);
+      const d = Math.floor(m / 1440);
+      const h = Math.floor((m % 1440) / 60);
+      const min = m % 60;
+      if (d > 0) return `${d}天 ${h}小时`;
+      if (h > 0) return `${h}小时 ${min}分`;
+      return `${min}分钟`;
+    }
+
+    const modeMap = {
+      rolling: '本地滚动',
+      manual: '已校准',
+      calibrated: '已校准',
+      'calibrated-rolled': '已自动跨周期重置',
+      'cli-bridge': 'CLI自动同步',
+    };
+
+    function renderSnap(snap) {
+      if (!snap) return;
+      document.getElementById('live-5h').textContent = `${snap.fiveHour.remainingPct.toFixed(1)}%`;
+      document.getElementById('live-5h-sub').textContent = `重置倒计时：${fmtDur(snap.fiveHour.resetInMs)}`;
+      document.getElementById('mode-5h').textContent = modeMap[snap.fiveHour.mode] || snap.fiveHour.mode;
+
+      document.getElementById('live-week').textContent = `${snap.weekly.remainingPct.toFixed(1)}%`;
+      document.getElementById('live-week-sub').textContent = `重置倒计时：${fmtDur(snap.weekly.resetInMs)}`;
+      document.getElementById('mode-week').textContent = modeMap[snap.weekly.mode] || snap.weekly.mode;
+    }
+
+    function fillSettingsForm(s, bridgeScriptPath) {
+      document.getElementById('sel-plan').value = s.planPreset || 'pro';
+      document.getElementById('sel-primary').value = s.primaryMetric || 'fiveHour';
+      document.getElementById('rng-scale').value = s.scale || 1.0;
+      document.getElementById('lbl-scale').textContent = `${Math.round((s.scale || 1) * 100)}%`;
+      document.getElementById('chk-sound').checked = Boolean(s.soundEnabled);
+      document.getElementById('rng-vol').value = s.volume ?? 0.65;
+      document.getElementById('lbl-vol').textContent = `${Math.round((s.volume ?? 0.65) * 100)}%`;
+      document.getElementById('chk-turn').checked = Boolean(s.showTurnBubble);
+      document.getElementById('chk-follow').checked = Boolean(s.followAntigravity);
+      if (bridgeScriptPath) {
+        document.getElementById('cli-cmd').textContent = `/statusline node "${bridgeScriptPath}"`;
+      }
+    }
+
+    window.petAPI.getInitialState().then(({ settings, snapshot, bridgeScriptPath }) => {
+      fillSettingsForm(settings, bridgeScriptPath);
+      renderSnap(snapshot);
+      if (snapshot) {
+        document.getElementById('cal-5h-pct').value = snapshot.fiveHour.remainingPct;
+        const m5 = Math.max(1, Math.round(snapshot.fiveHour.resetInMs / 60000));
+        document.getElementById('cal-5h-h').value = Math.floor(m5 / 60);
+        document.getElementById('cal-5h-m').value = m5 % 60;
+
+        document.getElementById('cal-w-pct').value = snapshot.weekly.remainingPct;
+        const mw = Math.max(1, Math.round(snapshot.weekly.resetInMs / 60000));
+        document.getElementById('cal-w-d').value = Math.floor(mw / 1440);
+        document.getElementById('cal-w-h').value = Math.floor((mw % 1440) / 60);
+      }
+    });
+
+    window.petAPI.onQuotaUpdated(renderSnap);
+
+    document.getElementById('btn-calibrate').addEventListener('click', async () => {
+      const fiveHourRemainingPct = parseFloat(document.getElementById('cal-5h-pct').value);
+      const fiveHourResetMinutes =
+        (parseInt(document.getElementById('cal-5h-h').value, 10) || 0) * 60 +
+        (parseInt(document.getElementById('cal-5h-m').value, 10) || 0);
+
+      const weeklyRemainingPct = parseFloat(document.getElementById('cal-w-pct').value);
+      const weeklyResetMinutes =
+        (parseInt(document.getElementById('cal-w-d').value, 10) || 0) * 1440 +
+        (parseInt(document.getElementById('cal-w-h').value, 10) || 0) * 60;
+
+      const snap = await window.petAPI.calibrateQuota({
+        fiveHourRemainingPct,
+        fiveHourResetMinutes: Math.max(1, fiveHourResetMinutes),
+        weeklyRemainingPct,
+        weeklyResetMinutes: Math.max(1, weeklyResetMinutes),
+      });
+      renderSnap(snap);
+      showToast('额度锚点已校准 ✦');
+    });
+
+    document.getElementById('btn-reset-cal').addEventListener('click', async () => {
+      const snap = await window.petAPI.clearCalibration();
+      renderSnap(snap);
+      showToast('已恢复纯本地滚动窗口统计');
+    });
+
+    function bindInstantSetting(el, eventName, getPatch) {
+      el.addEventListener(eventName, async () => {
+        await window.petAPI.saveSettings(getPatch());
+        showToast('设置已实时生效 ✦');
+      });
+    }
+
+    bindInstantSetting(document.getElementById('sel-plan'), 'change', () => ({
+      planPreset: document.getElementById('sel-plan').value,
+    }));
+    bindInstantSetting(document.getElementById('sel-primary'), 'change', () => ({
+      primaryMetric: document.getElementById('sel-primary').value,
+    }));
+    document.getElementById('rng-scale').addEventListener('input', (e) => {
+      document.getElementById('lbl-scale').textContent = `${Math.round(e.target.value * 100)}%`;
+    });
+    bindInstantSetting(document.getElementById('rng-scale'), 'change', () => ({
+      scale: parseFloat(document.getElementById('rng-scale').value),
+    }));
+    document.getElementById('rng-vol').addEventListener('input', (e) => {
+      document.getElementById('lbl-vol').textContent = `${Math.round(e.target.value * 100)}%`;
+    });
+    bindInstantSetting(document.getElementById('rng-vol'), 'change', () => ({
+      volume: parseFloat(document.getElementById('rng-vol').value),
+    }));
+    bindInstantSetting(document.getElementById('chk-sound'), 'change', () => ({
+      soundEnabled: document.getElementById('chk-sound').checked,
+    }));
+    bindInstantSetting(document.getElementById('chk-turn'), 'change', () => ({
+      showTurnBubble: document.getElementById('chk-turn').checked,
+    }));
+    bindInstantSetting(document.getElementById('chk-follow'), 'change', () => ({
+      followAntigravity: document.getElementById('chk-follow').checked,
+    }));
+
+    document.getElementById('btn-copy-cli').addEventListener('click', async () => {
+      const cmd = document.getElementById('cli-cmd').textContent;
+      await window.petAPI.copyText(cmd);
+      showToast('CLI 同步指令已复制 ✦');
+    });
+  </script>
+</body>
+</html>

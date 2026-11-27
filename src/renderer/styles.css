@@ -1,0 +1,466 @@
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  user-select: none;
+  -webkit-user-drag: none;
+}
+
+html,
+body {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background: transparent;
+  font-family: "Microsoft YaHei UI", "PingFang SC", "Segoe UI", system-ui, sans-serif;
+}
+
+/* 默认：猫娘站在右下侧，思想气泡在左上方（预留顶部 40px 供 Win32 SetWindowRgn 物理切除 DWM 白条） */
+.pet-root {
+  position: relative;
+  margin-top: 40px;
+  width: 340px;
+  height: 420px;
+  transform-origin: top left;
+}
+
+/* 漫画思想气泡外层 */
+.bubble-wrap {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  width: 236px;
+  z-index: 20;
+  transition: opacity 0.26s cubic-bezier(0.22, 1, 0.36, 1),
+    transform 0.28s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.bubble-wrap.hidden {
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(12px) scale(0.88);
+}
+
+.bubble-wrap.pop-anim {
+  animation: bubblePop 0.42s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+/* 经典大肥鱼白底深蓝描边椭圆漫画气泡 */
+.thought-bubble {
+  position: relative;
+  width: 232px;
+  min-height: 132px;
+  padding: 15px 18px 14px;
+  background: radial-gradient(circle at 30% 22%, #ffffff 0%, #f7f9ff 100%);
+  border: 3.5px solid #29386c;
+  border-radius: 50% / 47%;
+  box-shadow:
+    0 8px 20px rgba(17, 23, 54, 0.32),
+    inset 0 -3px 0 rgba(78, 103, 198, 0.12);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  cursor: pointer;
+  transition: transform 0.16s ease, box-shadow 0.16s ease;
+}
+
+.thought-bubble:hover {
+  transform: translateY(-2px);
+  box-shadow:
+    0 11px 24px rgba(24, 33, 77, 0.38),
+    0 0 12px rgba(139, 108, 246, 0.28),
+    inset 0 -3px 0 rgba(78, 103, 198, 0.16);
+}
+
+.thought-bubble:active {
+  transform: scale(0.96);
+}
+
+/* 气泡右上角迷你悬浮按钮 */
+.bubble-actions {
+  position: absolute;
+  top: 4px;
+  right: 16px;
+  display: flex;
+  gap: 4px;
+  opacity: 0;
+  transform: scale(0.9);
+  transition: opacity 0.18s ease, transform 0.18s ease;
+  z-index: 5;
+}
+
+.thought-bubble:hover .bubble-actions {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.mini-btn {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  border: 1.5px solid #29386c;
+  background: #eef2ff;
+  color: #29386c;
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 5px rgba(20, 28, 64, 0.18);
+  transition: background 0.15s, color 0.15s, transform 0.15s;
+}
+
+.mini-btn:hover {
+  background: #4e68c7;
+  color: #ffffff;
+  transform: scale(1.1);
+}
+
+/* 气泡卡片通用 */
+.bubble-card {
+  display: none;
+  width: 100%;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+}
+
+.bubble-card.active {
+  display: flex;
+  animation: fadeSlideIn 0.22s ease;
+}
+
+.bubble-title {
+  font-size: 13px;
+  font-weight: 800;
+  color: #364b88;
+  letter-spacing: 0.2px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  white-space: nowrap;
+}
+
+.reset-inline {
+  font-size: 10.5px;
+  font-weight: 700;
+  color: #6373a8;
+  background: rgba(78, 104, 199, 0.11);
+  padding: 1px 5px;
+  border-radius: 999px;
+}
+
+.bubble-hero {
+  font-size: 31px;
+  font-weight: 900;
+  line-height: 1.12;
+  letter-spacing: -0.5px;
+  font-variant-numeric: tabular-nums;
+  margin: 1px 0 3px;
+}
+
+.bubble-hero.health-good {
+  background: linear-gradient(135deg, #2451e8 0%, #6d3df7 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.bubble-hero.health-warn {
+  color: #d97706;
+  -webkit-text-fill-color: #d97706;
+}
+
+.bubble-hero.health-low,
+.bubble-hero.turn-cost {
+  color: #e03e36;
+  -webkit-text-fill-color: #e03e36;
+}
+
+/* 复刻大肥鱼底部蓝紫胶囊标签 */
+.bubble-pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  max-width: 192px;
+  padding: 2.5px 11px;
+  border-radius: 999px;
+  background: linear-gradient(135deg, #4b66c8 0%, #6859ea 100%);
+  color: #ffffff;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  box-shadow: 0 2px 6px rgba(75, 102, 200, 0.32);
+}
+
+/* 卡片 2：双进度条视图 */
+.bar-row {
+  width: 184px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 2px 0;
+}
+
+.bar-tag {
+  width: 22px;
+  font-size: 11px;
+  font-weight: 800;
+  color: #364b88;
+  text-align: right;
+}
+
+.bar-track {
+  flex: 1;
+  height: 9px;
+  background: #e4e9f7;
+  border-radius: 999px;
+  overflow: hidden;
+  border: 1px solid rgba(41, 56, 108, 0.16);
+}
+
+.bar-fill {
+  height: 100%;
+  border-radius: 999px;
+  transition: width 0.45s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.fill-5h {
+  background: linear-gradient(90deg, #3b82f6, #8b5cf6);
+}
+
+.fill-week {
+  background: linear-gradient(90deg, #10b981, #3b82f6);
+}
+
+.bar-fill.warn {
+  background: linear-gradient(90deg, #f59e0b, #ea580c);
+}
+
+.bar-fill.low {
+  background: linear-gradient(90deg, #ef4444, #dc2626);
+}
+
+.bar-val {
+  width: 38px;
+  font-size: 11px;
+  font-weight: 800;
+  color: #29386c;
+  text-align: left;
+  font-variant-numeric: tabular-nums;
+}
+
+.bars-sub {
+  margin-top: 3px;
+  font-size: 10.5px;
+  font-weight: 700;
+  color: #5b6b9e;
+}
+
+/* 卡片 3：双子星语台词 */
+.quote-tag {
+  font-size: 11px;
+  font-weight: 800;
+  color: #6d4aff;
+  margin-bottom: 2px;
+}
+
+.quote-text {
+  font-size: 12.5px;
+  font-weight: 700;
+  color: #2b396b;
+  line-height: 1.42;
+  max-width: 186px;
+}
+
+/* 漫画气泡引导小圆点（默认朝向右下角的猫娘头顶） */
+.thought-trail {
+  position: relative;
+  height: 30px;
+  width: 100%;
+  pointer-events: none;
+}
+
+.trail-dot {
+  position: absolute;
+  background: #ffffff;
+  border: 3px solid #29386c;
+  border-radius: 50%;
+  box-shadow: 0 3px 8px rgba(17, 23, 54, 0.25);
+}
+
+.trail-dot.dot-lg {
+  width: 19px;
+  height: 14px;
+  right: 48px;
+  top: 3px;
+}
+
+.trail-dot.dot-sm {
+  width: 12px;
+  height: 9px;
+  right: 32px;
+  top: 19px;
+}
+
+/* 角色立绘区域（默认靠右下） */
+.character-stage {
+  position: absolute;
+  right: 8px;
+  bottom: 4px;
+  width: 215px;
+  height: 272px;
+  z-index: 10;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+}
+
+.sprite-mover {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  transform-origin: bottom center;
+  animation: idleFloat 3.6s ease-in-out infinite;
+}
+
+.pet-sprite {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+  cursor: grab;
+  transform-origin: bottom center;
+  filter: drop-shadow(0 6px 14px rgba(22, 18, 56, 0.38));
+  transition: filter 0.2s ease, transform 0.2s ease;
+}
+
+.pet-sprite:active {
+  cursor: grabbing;
+}
+
+.pet-sprite:hover {
+  filter:
+    drop-shadow(0 6px 16px rgba(124, 77, 255, 0.48))
+    drop-shadow(0 2px 6px rgba(22, 18, 56, 0.3));
+}
+
+/* Q弹果冻按压动画 */
+.sprite-mover.squish {
+  animation: jellySquish 0.52s cubic-bezier(0.25, 1, 0.5, 1);
+}
+
+/* 左侧边缘吸附翻转态（与参考截图左下方站位完全一致！） */
+.pet-root.flipped .character-stage {
+  right: auto;
+  left: 6px;
+}
+
+.pet-root.flipped .pet-sprite {
+  transform: scaleX(-1);
+}
+
+.pet-root.flipped .bubble-wrap {
+  left: auto;
+  right: 8px;
+}
+
+.pet-root.flipped .trail-dot.dot-lg {
+  right: auto;
+  left: 48px;
+}
+
+.pet-root.flipped .trail-dot.dot-sm {
+  right: auto;
+  left: 32px;
+}
+
+/* 点击星光粒子特效 */
+.particle-layer {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 30;
+}
+
+.star-particle {
+  position: absolute;
+  font-size: 16px;
+  font-weight: 900;
+  pointer-events: none;
+  animation: floatStar 0.9s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  text-shadow: 0 2px 6px rgba(124, 77, 255, 0.45);
+}
+
+@keyframes idleFloat {
+  0%, 100% {
+    transform: translateY(0px) scale(1, 1);
+  }
+  50% {
+    transform: translateY(-4px) scale(1.01, 0.992);
+  }
+}
+
+@keyframes jellySquish {
+  0% {
+    transform: scale(1, 1);
+  }
+  22% {
+    transform: scale(1.16, 0.84) translateY(4px);
+  }
+  48% {
+    transform: scale(0.91, 1.09) translateY(-6px);
+  }
+  72% {
+    transform: scale(1.05, 0.96) translateY(1px);
+  }
+  100% {
+    transform: scale(1, 1) translateY(0);
+  }
+}
+
+@keyframes bubblePop {
+  0% {
+    transform: scale(0.72) translateY(14px);
+    opacity: 0;
+  }
+  65% {
+    transform: scale(1.05) translateY(-2px);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1) translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes fadeSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(3px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes floatStar {
+  0% {
+    opacity: 1;
+    transform: translate(0, 0) scale(0.6) rotate(0deg);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(var(--tx), var(--ty)) scale(1.25) rotate(var(--rot));
+  }
+}

@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' data:; style-src 'self' 'unsafe-inline'; script-src 'self';" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title></title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div id="pet-root" class="pet-root">
+    <!-- 漫画云朵思想气泡（复刻大肥鱼气泡并升级为 5h/周双额度卡片） -->
+    <div id="bubble-wrap" class="bubble-wrap interactive">
+      <div id="thought-bubble" class="thought-bubble" title="左键点击切换卡片 · 右键打开菜单">
+        <!-- 悬停迷你工具条 -->
+        <div class="bubble-actions">
+          <button id="btn-refresh" class="mini-btn" title="立即刷新额度">↻</button>
+          <button id="btn-settings" class="mini-btn" title="打开额度校准与设置">⚙</button>
+        </div>
+
+        <!-- 卡片 0：默认核心双额度视图（大肥鱼经典三段式排版） -->
+        <div id="card-main" class="bubble-card active">
+          <div class="bubble-title">
+            <span id="main-label">5小时剩余额度：</span>
+            <span id="main-reset" class="reset-inline">↻ --</span>
+          </div>
+          <div id="main-hero" class="bubble-hero health-good">--%</div>
+          <div id="main-pill" class="bubble-pill">周剩余 --% · ↻ --</div>
+        </div>
+
+        <!-- 卡片 1：上一轮对话消耗视图（新对话完成时自动弹出！） -->
+        <div id="card-turn" class="bubble-card">
+          <div class="bubble-title">上一轮对话消耗：</div>
+          <div id="turn-hero" class="bubble-hero turn-cost">-0.00%</div>
+          <div id="turn-pill" class="bubble-pill">暂无新对话记录</div>
+        </div>
+
+        <!-- 卡片 2：5小时 & 周双进度条明细视图 -->
+        <div id="card-bars" class="bubble-card">
+          <div class="bar-row">
+            <span class="bar-tag">5H</span>
+            <div class="bar-track">
+              <div id="bar-5h" class="bar-fill fill-5h" style="width: 100%"></div>
+            </div>
+            <span id="bar-5h-val" class="bar-val">--%</span>
+          </div>
+          <div class="bar-row">
+            <span class="bar-tag">周</span>
+            <div class="bar-track">
+              <div id="bar-week" class="bar-fill fill-week" style="width: 100%"></div>
+            </div>
+            <span id="bar-week-val" class="bar-val">--%</span>
+          </div>
+          <div id="bars-footer" class="bars-sub">今日 0 tok · Gemini</div>
+        </div>
+
+        <!-- 卡片 3：Gemini 猫娘星语互动台词 -->
+        <div id="card-quote" class="bubble-card">
+          <div class="quote-tag">✦ Gemini 星语</div>
+          <div id="quote-text" class="quote-text">异色瞳帮你盯紧额度啦，今天想写什么神仙代码喵？</div>
+        </div>
+      </div>
+
+      <!-- 漫画思想泡泡的两个小导引圆点 -->
+      <div class="thought-trail">
+        <span class="trail-dot dot-lg"></span>
+        <span class="trail-dot dot-sm"></span>
+      </div>
+    </div>
+
+    <!-- 角色立绘舞台与粒子层 -->
+    <div id="character-stage" class="character-stage">
+      <div id="particle-layer" class="particle-layer"></div>
+      <div id="sprite-mover" class="sprite-mover">
+        <img
+          id="pet-sprite"
+          class="pet-sprite"
+          src="../../assets/sprites/gemini-idle.png"
+          alt="Gemini Pet"
+          draggable="false"
+        />
+      </div>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
