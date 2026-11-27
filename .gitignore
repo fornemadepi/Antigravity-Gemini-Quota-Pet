@@ -1,0 +1,11 @@
+node_modules/
+*.log
+startup-err.log
+startup-out.log
+.DS_Store
+Thumbs.db
+dist/
+out/
+.env
+.env.*
+pet-settings.json
